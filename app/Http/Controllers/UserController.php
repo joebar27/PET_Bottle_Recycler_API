@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -17,12 +19,41 @@ class UserController extends Controller
         return User::all();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function userLogin(Request $request)
     {
-        //
+        $credentials = $request->only('email', 'password');
+        // Récupérer l'utilisateur par son email
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Vérifier si l'utilisateur existe
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+        // Vérifier si le mot de passe correspond
+        if ($credentials['password'] === $user->password) {
+            // Mot de passe correct
+            return $user;
+            // return response()->json(['message' => 'Mot de passe correct'], 200);
+        } else {
+            // Mot de passe incorrect
+            return response()->json(['message' => 'Mot de passe incorrect'], 401);
+        }
+    }
+
+    public function userRegister(Request $request)
+    {
+        $credentials = $request->only('email');
+        // Récupérer l'utilisateur par son email
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Vérifier si l'utilisateur existe
+        if ($user) {
+            return response()->json(['message' => 'Utilisateur déjà existant'], 404);
+        }
+        if (!$user) {
+            $user = User::create($request->all());
+            return response()->json(['user' => $user], 201);
+        }
     }
 
     /**

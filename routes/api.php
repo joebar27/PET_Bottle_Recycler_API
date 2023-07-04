@@ -20,6 +20,9 @@ Route::middleware('auth:sanctum')->get('/users', function (Request $request) {
 
 Route::get("/users", "App\Http\Controllers\UserController@index");
 Route::get("/users/{email}", "App\Http\Controllers\UserController@show");
-Route::post("/users", "App\Http\Controllers\UserController@store");
+
+Route::post("/users/login", "App\Http\Controllers\UserController@userLogin");
+Route::post("/users/register", "App\Http\Controllers\UserController@userRegister");
+
 Route::put("/users/{user}", "App\Http\Controllers\UserController@update");
 Route::delete("/users/{user}", "App\Http\Controllers\UserController@destroy");
