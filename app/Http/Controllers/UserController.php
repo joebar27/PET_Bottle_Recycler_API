@@ -19,53 +19,49 @@ class UserController extends Controller
         return User::all();
     }
 
+    /**
+     * User login.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function userLogin(Request $request)
     {
         $credentials = $request->only('email', 'password');
         // Récupérer l'utilisateur par son email
         $user = User::where('email', $credentials['email'])->first();
-
         // Vérifier si l'utilisateur existe
         if (!$user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
         // Vérifier si le mot de passe correspond
-        if ($credentials['password'] === $user->password) {
+        if (Hash::check($credentials['password'], $user->password)) {
             // Mot de passe correct
-            return $user;
-            // return response()->json(['message' => 'Mot de passe correct'], 200);
+            return response()->json(['user' => $user], 200);
         } else {
             // Mot de passe incorrect
-            return response()->json(['message' => 'Mot de passe incorrect'], 401);
+            return response()->json(['message' => 'API Mot de passe incorrect'], 401);
         }
     }
 
     public function userRegister(Request $request)
     {
-        $credentials = $request->only('email');
-        // Récupérer l'utilisateur par son email
-        $user = User::where('email', $credentials['email'])->first();
+        $request->validate([
+            'name' => 'required',
+            'username' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'phone' => 'required'
+        ]);
 
-        // Vérifier si l'utilisateur existe
-        if ($user) {
-            return response()->json(['message' => 'Utilisateur déjà existant'], 404);
-        }
-        if (!$user) {
-            $user = User::create($request->all());
-            return response()->json(['user' => $user], 201);
-        }
-    }
+        $user = new User;
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->phone = $request->phone;
+        $user->save();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $user = User::create($request->all());
-        return $user;
+        return response()->json(['user' => $user], 201);
     }
 
     /**
