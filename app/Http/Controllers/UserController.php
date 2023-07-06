@@ -70,7 +70,7 @@ class UserController extends Controller
      * @param string $username
      * @return \Illuminate\Http\Response
      */
-    public function show($email)
+    public function userShow($email)
     {
         $user = User::where('email', $email)->first();
         if ($user) {
@@ -108,10 +108,15 @@ class UserController extends Controller
      * @param \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function userDestroy($email)
     {
-        $user = User::find($user->id);
-        $user->delete();
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $user->delete();
+            return $user;
+        } else {
+            return response()->json(['message' => 'User not found'], 404);
+        }
         return $user;
     }
 }
